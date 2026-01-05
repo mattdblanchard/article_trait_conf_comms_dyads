@@ -2,7 +2,7 @@
 source("R/publish/functions.R")
 
 # read data
-d <- read_csv("data/publish/confidence_matching_raw_data.csv")
+d <- read_csv("confidence_matching_data.csv")
 
 # aggregate to participant × condition
 x <- d %>% 
