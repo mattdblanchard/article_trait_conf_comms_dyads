@@ -2,7 +2,7 @@
 source("R/publish/functions.R")
 
 # read data
-d <- read_csv("data/publish/confidence_matching_raw_data.csv") %>% 
+d <- read_csv("confidence_matching_data.csv") %>% 
   mutate(
     group_id   = factor(group_id),
     part_id    = factor(part_id),
