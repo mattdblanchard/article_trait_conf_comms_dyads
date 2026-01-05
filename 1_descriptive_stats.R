@@ -2,7 +2,7 @@
 source("R/publish/functions.R")
 
 # read raw data
-d <- read_csv("data/publish/confidence_matching_raw_data.csv") %>% 
+d <- read_csv("confidence_matching_data.csv") %>% 
   mutate(group_id = factor(group_id),
          comm_cond = factor(comm_cond, levels = c("Isolated", "Passive", "Active")),
          conf_cond = factor(conf_cond, levels = c("Low", "Mixed", "High")))
