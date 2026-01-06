@@ -13,8 +13,7 @@ d <- read_csv("confidence_matching_data.csv") %>%
     itemnum = factor(itemnum)
   )
 
-# consensus compute confidence change for each dyad from trial to trial
-# separately for ind and grp responses
+# compute confidence matching within each dyad for each item
 x <- d %>% 
   select(group_id, member_id, grouping, itemnum, conf_cond, comm_cond, conf) %>%
   pivot_wider(names_from = member_id, values_from = conf) %>% 
@@ -32,7 +31,7 @@ x %>%
             grp_conf_diff = mean(grp_conf_diff, na.rm = T),
             conf_match = mean(conf_match, na.rm = T))
 
-# cognitive ability per group_id: centered at the sample mean
+# mean center cognitive ability
 cen_cog <- d %>%
   filter(grouping == "ind", comm_cond == "Isolated") %>%
   select(group_id, member_id, rapm_acc, eat_acc) %>% 
@@ -46,14 +45,13 @@ cen_cog <- d %>%
     eat_acc_cen  = as.numeric(scale(eat_acc,  center = TRUE, scale = FALSE))
   )
 
-# add cog ability to data
-# make item_num a factor
+# add mean centered cog ability to data
 x <- x %>% 
   left_join(cen_cog, by = "group_id")
 
 
 # compare confidence matching between conditions ---------------------------------------------------------------------
-# identify appropriate random effects structure
+# identify random effects structure
 model1 <- lm(
   conf_match ~ comm_cond * conf_cond + rapm_acc_cen + eat_acc_cen,
   data = x
@@ -76,7 +74,7 @@ anova(model3,model2,model1) %>%
   broom::tidy()
 
 
-# examine interaction structure for models with just random intercepts
+# examine interaction structure for model
 # main effects only
 model1 <- lmer(
   conf_match ~ comm_cond + conf_cond + rapm_acc_cen + eat_acc_cen +
@@ -84,6 +82,7 @@ model1 <- lmer(
   data = x
 )
 
+# main + interaction effects
 model2 <- lmer(
   conf_match ~ comm_cond * conf_cond + rapm_acc_cen + eat_acc_cen +
     (1 | group_id) + (1 | itemnum),
@@ -115,13 +114,13 @@ performance::r2(model1)
 # main effect estimates ---------------------------------------------------
 pb_limit <- 3140 # manually set dfs
 
-# Compute emmeans objects (save these for contrasts)
+# compute estimated marginal means and save for contrasts
 emm_comm <- emmeans(model1, ~ comm_cond, pbkrtest.limit = pb_limit)
 emm_conf <- emmeans(model1, ~ conf_cond, pbkrtest.limit = pb_limit)
 emm_rapm <- emtrends(model1, ~1, var = "rapm_acc_cen", pbkrtest.limit = pb_limit)
 emm_eat <- emtrends(model1, ~1, var = "eat_acc_cen", pbkrtest.limit = pb_limit)
 
-# Main effects table
+# main effects table
 main_effects <- bind_rows(
   tidy(emm_comm) %>% rename(var1 = comm_cond),
   tidy(emm_conf) %>% rename(var1 = conf_cond),
@@ -135,7 +134,7 @@ main_effects <- bind_rows(
 
 main_effects
 
-# Contrasts table
+# contrasts table
 contrasts <- bind_rows(
   contrast(emm_comm, method = "pairwise", adjust = "holm") %>% as_tibble(),
   contrast(emm_conf, method = "pairwise", adjust = "holm") %>% as_tibble()
@@ -144,7 +143,6 @@ contrasts <- bind_rows(
 
 contrasts
   
-
 
 # plots -------------------------------------------------------------------
 # figure 3
@@ -267,7 +265,7 @@ anova(model4,model3,model2,model1) %>% tidy()
 model1 <- lm(acc_change ~ conf_match + comm_cond + conf_cond + rapm_acc_cen + eat_acc_cen,
              data = x)
 
-# addition of 2 way interactions
+# addition of 2-way interactions
 model2 <- lm(acc_change ~ 
                conf_match * comm_cond +
                conf_match * conf_cond + 
@@ -275,14 +273,14 @@ model2 <- lm(acc_change ~
                rapm_acc_cen + eat_acc_cen,
              data = x)
 
-# addition of 3 way interactions
+# addition of 3-way interactions
 model3 <- lm(acc_change ~ conf_match * comm_cond * conf_cond + rapm_acc_cen + eat_acc_cen,
              data = x)
 
 # compare models
 anova_results <- anova(model1, model2, model3)
 
-# Combine all into a nice table
+# combine all results into a table
 tibble(
   Model = c("Model 1", "Model 2", "Model 3"),
   AIC = round(c(AIC(model1), AIC(model2), AIC(model3))),
@@ -295,13 +293,13 @@ tibble(
   `Pr(>F)` = round(c(NA, anova_results$`Pr(>F)`[-1]),3)
 )
 
-# Overall model results
+# overall best fitting model results
 car::Anova(model3, type = "III", test.statistic = "F") %>% tidy() %>% 
   mutate(
     statistic = paste0(round(statistic, 2), sig_stars(p.value)),
     p.value = round(p.value, 4))
 
-# Three way interaction effects for conf_match predicting acc_change 
+# three-way interaction effects for conf_match predicting acc_change 
 slopes_3way <- emtrends(model3,
                         specs = ~ comm_cond * conf_cond,
                         var = "conf_match")
@@ -310,7 +308,7 @@ summary(slopes_3way, infer = TRUE) %>% as_tibble() %>%
   mutate(t.ratio = paste0(round(t.ratio,2), sig_stars(p.value))) %>% 
   arrange(comm_cond, conf_cond)
 
-# pairwise comparisons for three way interaction effects
+# pairwise comparisons for three-way interaction effects
 pair_comm_within_conf <- contrast(slopes_3way,
                                   method = "pairwise",
                                   by = "conf_cond",
@@ -328,7 +326,7 @@ bind_rows(pair_comm_within_conf %>% as.data.frame() %>% as_tibble() %>% rename(v
 
 
 # plot confidence matching and accuracy change relationships
-# Estimate predicted marginal means across slope range by confidence condition
+# estimate predicted marginal means for each confidence condition
 em_conf_match <- emmeans(
   model3,
   ~ conf_match * comm_cond * conf_cond,
@@ -338,7 +336,7 @@ em_conf_match <- emmeans(
     length.out = 100))
 )
 
-# Convert to dataframe with confidence intervals
+# convert to dataframe with confidence intervals
 df_conf_match <- summary(em_conf_match, infer = TRUE)
 
 # make plot
