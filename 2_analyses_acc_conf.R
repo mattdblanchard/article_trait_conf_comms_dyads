@@ -226,7 +226,7 @@ emm_conf <- emmeans(conf_final, ~ grouping | comm_cond * conf_cond) %>%
 
 my_colours <- c("#DD8D29", "#E2D200", "#46ACC8")
 
-# Get pairwise contrasts between Ind vs Dyad within each comm_cond x conf_cond condition
+# get pairwise contrasts between Ind vs Dyad within each comm_cond x conf_cond condition
 contrast_df <- bind_rows(emm_acc, emm_conf) %>%
   group_by(comm_cond, conf_cond, outcome) %>% 
   mutate(
@@ -315,7 +315,7 @@ plot_conf <- contrast_df %>%
     legend.position = "bottom"
   )
 
-# Combine the plots vertically
+# combine the plots
 stacked_plot <- cowplot::plot_grid(
   plot_acc, plot_conf,
   ncol = 1,
@@ -323,7 +323,7 @@ stacked_plot <- cowplot::plot_grid(
   rel_heights = c(1, 1.2)
 )
 
-# Add a shared y-axis label
+# add a shared y-axis label
 ggdraw() +
   draw_label("Dyad – Individual Difference", x = 0.02, angle = 90, fontface = "plain", size = 12) +
   draw_plot(stacked_plot, x = 0.05, width = 0.95)
