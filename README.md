@@ -1,7 +1,7 @@
 # article_trait_conf_comms_dyads
 This repository contains the anonymised data and R scripts supporting the article: <br>
  <br>
-[Blanchard et al. (2026) How Trait Confidence and Communication Shape Dyadic Decision Outcomes and Decision-Specific Confidence Matching] (https://osf.io/preprints/psyarxiv/rft7q_v1) <br>
+[Blanchard et al. (2026) How Trait Confidence and Communication Shape Dyadic Decision Outcomes and Decision-Specific Confidence Matching](https://osf.io/preprints/psyarxiv/rft7q_v1) <br>
  <br>
  <br>
 There are three R scripts to reproduce the main analyses:<br>
