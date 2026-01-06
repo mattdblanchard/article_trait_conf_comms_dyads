@@ -5,10 +5,10 @@ This repository contains the anonymised data and R scripts supporting the articl
  <br>
  <br>
 There are three R scripts to reproduce the main analyses:<br>
-**functions.R**: loads the packages and custom functions required to run the other three scripts<br>
-**1_descriptive_stats.R**: calculates the descriptive statistics and related plots<br>
-**2_analyses_acc_conf.R**: fits the models and produces plots for decision accuracy and decision confidence<br>
-**3_analyses_conf_match.R**: fits the models and produces plots for decision-specific confidence matching<br>
+- **functions.R**: loads the packages and custom functions required to run the other three scripts<br>
+- **1_descriptive_stats.R**: calculates the descriptive statistics and related plots<br>
+- **2_analyses_acc_conf.R**: fits the models and produces plots for decision accuracy and decision confidence<br>
+- **3_analyses_conf_match.R**: fits the models and produces plots for decision-specific confidence matching<br>
 <br>
 <br>
 The data file contains the following information: <br>
